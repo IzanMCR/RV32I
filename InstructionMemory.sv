@@ -1,10 +1,17 @@
 module InstructionMemory(
-    input logic [31:0] address;
-    output logic [31:0] instruction;
+    input logic Clk,
+    input logic [31:0] Address;
+    output logic [31:0] Instruction;
     );
 
-    logic [31:0] memory [4095:0];
+    logic [31:0] Memory [4095:0];
 
-    assign instruction = memory[address];
+    initial begin
+        $readmemh("rom.hex", Memory);
+    end
+
+    always_ff @(posedge Clk) begin
+        else Instruction <= Memory[Address[13:2]];
+    end
     
 endmodule

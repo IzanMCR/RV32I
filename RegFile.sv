@@ -1,5 +1,5 @@
 module RegFile(
-    input logic clk,
+    input logic Clk,
     input logic [31:0] Data,
     input logic Rst,
     input logic [4:0] Rd,
@@ -10,13 +10,13 @@ module RegFile(
     output logic [31:0] Rs2Out
     );
 
-    assign [31:0] Rf [31:1];
+    logic [31:0] Rf [31:1];
 
-    always_ff @(posedge clk) begin : 
-        if(Rst) for(i = 0; i < 32; i++) Rf <= 32'b0;
-        if(We) Rf[Rd] <= Data;
+    always_ff @(posedge Clk) begin 
+        if(Rst) for(int i = 0; i < 32; i++) Rf[i] <= 32'b0;
+        if(We && Rd != 5'b0) Rf[Rd] <= Data;
     end
 
-    assign Rs1Out = (Rs1 == 0) 0 : Rf[Rs1];
-    assign Rs2Out = (Rs2 == 0) 0 : Rf[Rs2];
+    assign Rs1Out = (Rs1 == 0) ?  32'b0 : ((We && (Rd == Rs1)) ? Data : Rf[Rs1]);
+    assign Rs2Out = (Rs2 == 0) ? 32'b0 : ((We && (Rd == Rs2)) ? Data : Rf[Rs2]);
 endmodule

@@ -1,9 +1,12 @@
-module programCounter(
+module ProgramCounter(
     input logic Rst,
-    input logic [31:0] address,
-    output logic [31:0] out
+    input logic Clk,
+    input logic [31:0] Address,
+    output logic [31:0] Out
     );
 
-    assign out = (Rst == 1) 32'b0 : address;
-    
+    always_ff @(posedge Clk)begin
+        Out <= (!Rst) ? 32'b0 : Address;
+    end
+
 endmodule

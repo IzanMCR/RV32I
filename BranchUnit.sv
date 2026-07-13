@@ -13,7 +13,7 @@ module BranchUnit(
             3'b101: Jump = ($signed(Rs1Out) >= $signed(Rs2Out));
             3'b110: Jump = (Rs1Out < Rs2Out);
             3'b111: Jump = (Rs1Out >= Rs2Out);
-            default: Jump = 1'b0
+            default: Jump = 1'b0;
         endcase
     end
 
