@@ -1,3 +1,5 @@
+//We are going to implement TAGED to Branch Prediction
+
 typedef enum logic [1:0] {
         STRONGLYTAKEN  = 2'b11,
         WEAKLYTAKEN = 2'b10,
