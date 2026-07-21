@@ -1,56 +1,44 @@
-module BranchPredictor (
-    input logic Clk,
-    input logic Rst,
-    input logic Update_En,         
-    input logic [31:0] Update_PC,   
-    input logic BranchTaken,
-    output logic BranchPrediction //1: Yes 0: No
-    );
-
-    typedef enum logic [1:0] {
+typedef enum logic [1:0] {
         STRONGLYTAKEN  = 2'b11,
         WEAKLYTAKEN = 2'b10,
         WEAKLYNOTTAKEN = 2'b01,
         STRONGLYNOTTAKEN  = 2'b00
     } States;
 
-    States CurrentState;
-    States NextState;
+module BranchPredictor (
+    input logic Clk,
+    input logic Rst,
+    input  logic [31:0] FetchPC,
+    output logic BranchPrediction //1: Yes 0: No
+    input logic UpdateEn,         
+    input logic [31:0] UpdatePC,   
+    input logic BranchTaken   
+    );
+
+    logic [1:0] BHT [0:1023];
+
+    logic [9:0] FetchIndex;
+    logic [9:0] UpdateIndex;
+
+    assign FetchIndex  = FetchPC[11:2];
+    assign UpdateIndex = UpdatePC[11:2];
+    
+    assign BranchPrediction = (BHT[FetchIndex][1]);
 
     always_ff @(posedge Clk) begin
         if(!Rst) begin
-            CurrentState <= WEAKLYNOTTAKEN;
+            for (int i = 0; i < 1024; i++) begin
+                BHT[i] <= WEAKLYNOTTAKEN;
+            end
         end
-        else begin
-            CurrentState <= NextState;
+        else if (UpdateEn) begin
+            case (BHT[UpdateIndex])
+                STRONGLYNOTTAKEN: BHT[UpdateIndex] <= BranchTaken ? WEAKLYNOTTAKEN : STRONGLYNOTTAKEN;
+                WEAKLYNOTTAKEN:   BHT[UpdateIndex] <= BranchTaken ? WEAKLYTAKEN    : STRONGLYNOTTAKEN;
+                WEAKLYTAKEN:      BHT[UpdateIndex] <= BranchTaken ? STRONGLYTAKEN  : WEAKLYNOTTAKEN;
+                STRONGLYTAKEN:    BHT[UpdateIndex] <= BranchTaken ? STRONGLYTAKEN  : WEAKLYTAKEN;
+            endcase
         end
-    end
-
-    always_comb begin
-        NextState = CurrentState;
-        case(CurrentState)
-            STRONGLYNOTTAKEN: begin
-                if (BranchTaken) NextState = WEAKLYNOTTAKEN;
-                else NextState = STRONGLYNOTTAKEN;
-                BranchPrediction = 0;
-                end
-            WEAKLYNOTTAKEN: begin
-                if (BranchTaken) NextState = WEAKLYTAKEN;
-                else NextState = STRONGLYNOTTAKEN;
-                BranchPrediction = 0;
-            end
-            WEAKLYTAKEN: begin
-                if (BranchTaken) NextState = STRONGLYTAKEN;
-                else NextState = WEAKLYNOTTAKEN;
-                BranchPrediction = 1;
-            end
-            STRONGLYTAKEN: begin
-                if (BranchTaken) NextState = STRONGLYTAKEN;
-                else NextState = WEAKLYTAKEN;
-                BranchPrediction = 1;
-            end
-            default: NextState = WEAKLYNOTTAKEN;
-        endcase
     end
 
 endmodule
