@@ -1,6 +1,9 @@
+//As we are going to use a RS for each logic unit and all ops occurs in the same cycles we just need a pointer that +1 when we create a 
+//enter and -1 when quit it. 
+
 typedef struct packed {
         logic                Busy;
-        logic [4:0]          Op;
+        logic [6:0]          Op;
         logic [31:0]         Vj;
         logic [31:0]         Vk;
         logic [4:0]          Qj;     
@@ -13,9 +16,10 @@ module ReservationStation#(parameter ResStaSize = 4, parameter TagSize = 5, para
     input logic Clk,
     input logic Rst,
     input logic Flush,
+    input logic Ready,
+    input logic Input,
     input logic Head,
     input logic [6:0] OpCode,
-    input logic [4:0] ALUSelect,
     input logic [TagSize - 1:0] ROBTag,
     input logic [1:0] Tag;
     input logic CDBValid0,
@@ -30,7 +34,9 @@ module ReservationStation#(parameter ResStaSize = 4, parameter TagSize = 5, para
     input ExceptionsCode CDBExCode1,
     );
 
-    logic [31:0] Registers; //It is gonna save 0 if it no uses in any ResStaIns and the ResStaSize tag if register is used is one of them
+    logic [4:0] Pointer;
+
+    logic [31:0] Registers; //It is gonna save 0 if it no uses in any ResStaIns and the ROBTag tag if register is used is one of them
     ResSta [ResStaSize - 1:0] ResStaIns;
 
     always_ff @(posedge Clk) begin
@@ -38,8 +44,10 @@ module ReservationStation#(parameter ResStaSize = 4, parameter TagSize = 5, para
             ResStaIns <= '0;
         end
         else begin
-            if(Tag == RSTag) begin
-
+            if(Input) begin
+                ResStaIns[Pointer].Busy <= 1'b1;
+                ResStaIns[Pointer].Op <= OpCode;
+                Pointer <= Pointer + 1;
             end
         end
     end

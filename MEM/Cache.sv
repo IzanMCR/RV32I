@@ -15,7 +15,8 @@ module Cache(
     output logic Stall,
     output logic [63:0] MemWriteData,
     output logic MemWe,
-    output logic [31:0] DataOut,
+    output logic MisalignedException,
+    output logic [31:0] DataOut
     );
 
     
@@ -66,7 +67,7 @@ module Cache(
         .Miss(Miss),
         .Dirty(Dirty),
         .Data(Data),
-        .CacheWe(CacheWe),
+        .MemRead(MemRead),
         .MemWe(MemWe),
         .Counter(Counter)
     );
@@ -74,6 +75,7 @@ module Cache(
     always_comb begin
 
         DataOut = 32'b0;
+        MisalignedException = (ByteEnable == 4'b1111) ? (((n >> 2) << 2) != Address) : (ByteEnable == 4'b0011) ? (((n >> 1) << 1) != Address) : 0;
 
         if(MemWe && LRU[Index] == 0) MemWriteData = DataWay0[Index][Counter * 64 +: 64];
         else if(MemWe && LRU[Index] == 1) MemWriteData = DataWay1[Index][Counter * 64 +: 64];

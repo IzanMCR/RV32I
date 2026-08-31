@@ -119,7 +119,7 @@ module Decoder(
         //SH
         else if(OpCode == 7'b0100011 && Funct3 == 3'b001) begin
             MemWe = 1;
-            ByteEnable = 4'b0011;
+            ByteEnable = (Address[1]) ? 4'b1100 : 4'b0011;
             ALUSrc = 1;
         end
 

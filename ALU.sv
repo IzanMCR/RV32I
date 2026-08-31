@@ -27,7 +27,7 @@ module ALU(
     assign Sra = ($signed(OperandA) >>> OperandB[4:0]);
 
     always_comb begin
-        Out.Valid = 1;
+        Out.Valid = (Enable == 1) ? 1:0;
         Out.ROBTag = ROBTag;
         case(ALUSelect) 
             4'b0000: Out.Result = Add;

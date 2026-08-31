@@ -29,7 +29,7 @@ module CacheFSM(
         else begin
             CurrentState <= NextState;
             if(CurrentState == IDLE) Counter <= 3'b000;
-            else if(MemReady) Counter = Counter + 1'b1;
+            else if(MemReady) Counter <= Counter + 1'b1;
         end
     end
 
